@@ -1,0 +1,606 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Official Academic Nerd Investigation 🤓📚</title>
+<style>
+  /* =======================================================
+     🎨 EDIT COLORS HERE
+  ======================================================= */
+  :root{
+    --bg1:#fdeff2;        /* page background gradient start */
+    --bg2:#eaf2ff;        /* page background gradient end */
+    --pink:#ffc4dd;
+    --lavender:#d6c9ff;
+    --mint:#c3f0ce;
+    --yellow:#fff1b8;
+    --ink:#3a2e4d;
+    --card:#fffaf5;
+    --accent:#ff6f9c;
+    --accent2:#7c6cff;
+    --shadow: 0 10px 30px rgba(120, 90, 150, .18);
+  }
+
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;height:100%;}
+  body{
+    font-family: 'Trebuchet MS','Segoe UI',Verdana,sans-serif;
+    background: linear-gradient(135deg,var(--bg1),var(--bg2));
+    color:var(--ink);
+    min-height:100vh;
+    overflow-x:hidden;
+    position:relative;
+  }
+
+  /* ---------- floating background doodles ---------- */
+  #floaters{
+    position:fixed;inset:0;
+    pointer-events:none;
+    overflow:hidden;
+    z-index:0;
+  }
+  .float-emoji{
+    position:absolute;
+    font-size: 1.8rem;
+    opacity:.35;
+    animation: drift linear infinite;
+    user-select:none;
+  }
+  @keyframes drift{
+    0%{ transform: translateY(110vh) rotate(0deg); }
+    100%{ transform: translateY(-15vh) rotate(360deg); }
+  }
+
+  .wrap{
+    position:relative;
+    z-index:1;
+    max-width:560px;
+    margin:0 auto;
+    min-height:100vh;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    padding:24px 18px 80px;
+  }
+
+  .screen{
+    width:100%;
+    display:none;
+    animation: pop .45s ease;
+  }
+  .screen.active{ display:block; }
+
+  @keyframes pop{
+    from{ opacity:0; transform: scale(.92) translateY(14px); }
+    to{ opacity:1; transform: scale(1) translateY(0); }
+  }
+
+  .card{
+    background:var(--card);
+    border-radius:28px;
+    padding:28px 22px;
+    box-shadow: var(--shadow);
+    border:3px dashed var(--lavender);
+    position:relative;
+  }
+
+  /* case-file tab on top of card */
+  .card::before{
+    content:"📁 CASE FILE";
+    position:absolute;
+    top:-16px;
+    left:20px;
+    background:var(--yellow);
+    padding:4px 14px;
+    border-radius:12px;
+    font-size:.75rem;
+    font-weight:bold;
+    letter-spacing:.5px;
+    box-shadow: 0 4px 10px rgba(0,0,0,.08);
+    transform: rotate(-3deg);
+  }
+
+  h1{
+    font-size:1.6rem;
+    text-align:center;
+    margin:6px 0 8px;
+    line-height:1.3;
+  }
+  .subtitle{
+    text-align:center;
+    font-size:.95rem;
+    opacity:.75;
+    margin-bottom:20px;
+  }
+
+  /* ---------- buttons ---------- */
+  button{
+    font-family:inherit;
+    cursor:pointer;
+    border:none;
+    outline:none;
+  }
+  .btn{
+    display:block;
+    width:100%;
+    background: linear-gradient(135deg,var(--accent),var(--accent2));
+    color:#fff;
+    font-size:1rem;
+    font-weight:bold;
+    padding:14px 18px;
+    border-radius:18px;
+    margin:10px 0;
+    box-shadow: 0 6px 0 rgba(0,0,0,.12);
+    transition: transform .15s ease, box-shadow .15s ease;
+  }
+  .btn:hover{ transform: translateY(-3px) scale(1.02); }
+  .btn:active{ transform: translateY(2px); box-shadow:0 2px 0 rgba(0,0,0,.12); }
+
+  .option-btn{
+    display:block;
+    width:100%;
+    text-align:left;
+    background:#fff;
+    border:2px solid var(--lavender);
+    color:var(--ink);
+    font-size:.95rem;
+    padding:14px 16px;
+    border-radius:16px;
+    margin:9px 0;
+    transition: all .15s ease;
+  }
+  .option-btn:hover{
+    background:var(--pink);
+    border-color:var(--accent);
+    transform: translateX(4px);
+  }
+
+  .secondary-btn{
+    background:#fff;
+    border:2px solid var(--accent2);
+    color:var(--accent2);
+    box-shadow:none;
+  }
+  .secondary-btn:hover{ background:var(--lavender); }
+
+  /* ---------- progress + meter ---------- */
+  .progress-tag{
+    text-align:center;
+    font-size:.8rem;
+    font-weight:bold;
+    color:var(--accent2);
+    margin-bottom:6px;
+    letter-spacing:.5px;
+  }
+
+  .meter-wrap{
+    width:100%;
+    max-width:560px;
+    margin:0 auto 16px;
+    position:relative;
+    z-index:1;
+  }
+  .meter-label{
+    display:flex;
+    justify-content:space-between;
+    font-size:.8rem;
+    font-weight:bold;
+    margin-bottom:5px;
+    color:var(--ink);
+  }
+  .meter-bar{
+    height:18px;
+    width:100%;
+    background:#fff;
+    border-radius:20px;
+    overflow:hidden;
+    border:2px solid var(--lavender);
+  }
+  .meter-fill{
+    height:100%;
+    width:0%;
+    background: linear-gradient(90deg,var(--mint),var(--yellow),var(--accent));
+    transition: width .6s ease;
+    border-radius:20px;
+  }
+  .meter-flash{
+    text-align:center;
+    font-size:.8rem;
+    font-style:italic;
+    color:var(--accent2);
+    min-height:18px;
+    margin-top:4px;
+  }
+
+  .feedback{
+    margin-top:16px;
+    background:var(--mint);
+    border-radius:16px;
+    padding:12px 14px;
+    font-size:.9rem;
+    text-align:center;
+    font-weight:bold;
+    display:none;
+  }
+  .feedback.show{ display:block; animation: pop .3s ease; }
+
+  /* ---------- loading screen ---------- */
+  .loading-lines{
+    list-style:none;
+    padding:0;
+    margin:18px 0 0;
+    min-height:200px;
+  }
+  .loading-lines li{
+    opacity:0;
+    transform: translateX(-10px);
+    margin:10px 0;
+    font-size:.95rem;
+    font-weight:bold;
+  }
+  .loading-lines li.show{
+    animation: lineIn .4s forwards;
+  }
+  @keyframes lineIn{
+    to{ opacity:1; transform:translateX(0); }
+  }
+  .spinner{
+    width:46px;height:46px;
+    border:6px solid var(--lavender);
+    border-top-color:var(--accent);
+    border-radius:50%;
+    margin:0 auto 10px;
+    animation: spin 1s linear infinite;
+  }
+  @keyframes spin{ to{ transform:rotate(360deg);} }
+
+  /* ---------- final screen ---------- */
+  .result-title{
+    font-size:1.5rem;
+    text-align:center;
+    margin:6px 0 14px;
+  }
+  .result-msg{
+    text-align:center;
+    font-size:.95rem;
+    line-height:1.5;
+    margin-bottom:6px;
+  }
+  .result-small{
+    text-align:center;
+    font-size:.8rem;
+    opacity:.7;
+    margin-bottom:18px;
+  }
+  .final-feedback{
+    margin-top:14px;
+    background:var(--yellow);
+    border-radius:16px;
+    padding:12px;
+    text-align:center;
+    font-size:.9rem;
+    font-weight:bold;
+    display:none;
+  }
+  .final-feedback.show{ display:block; animation:pop .3s ease; }
+
+  footer{
+    position:relative;
+    z-index:1;
+    text-align:center;
+    font-size:.75rem;
+    opacity:.55;
+    padding:16px;
+  }
+
+  @media (max-width:380px){
+    h1{font-size:1.35rem;}
+    .card{padding:22px 16px;}
+  }
+</style>
+</head>
+<body>
+
+<div id="floaters"></div>
+
+<div class="meter-wrap" id="meterWrap" style="display:none;">
+  <div class="meter-label">
+    <span>🤓 Nerd Percentage Meter</span>
+    <span id="meterPercent">0%</span>
+  </div>
+  <div class="meter-bar"><div class="meter-fill" id="meterFill"></div></div>
+  <div class="meter-flash" id="meterFlash"></div>
+</div>
+
+<div class="wrap">
+
+  <!-- ============ START SCREEN ============ -->
+  <section class="screen active" id="screen-start">
+    <div class="card">
+      <!-- ✏️ EDIT WEBSITE TITLE HERE -->
+      <h1>Official Academic Nerd Investigation 🤓📚</h1>
+      <p class="subtitle">Please answer honestly. The system already suspects you.</p>
+      <div style="text-align:center;font-size:2.4rem;margin:18px 0;">🔍📖✏️☕</div>
+      <button class="btn" onclick="beginInvestigation()">Begin Investigation</button>
+    </div>
+  </section>
+
+  <!-- ============ QUESTION SCREEN (templated) ============ -->
+  <section class="screen" id="screen-question">
+    <div class="progress-tag" id="progressTag">Evidence 1/8</div>
+    <div class="card">
+      <h1 id="questionText">Question</h1>
+      <div id="optionsContainer"></div>
+      <div class="feedback" id="feedbackBox"></div>
+    </div>
+  </section>
+
+  <!-- ============ LOADING SCREEN ============ -->
+  <section class="screen" id="screen-loading">
+    <div class="card">
+      <h1>Processing Evidence... 🕵️‍♀️</h1>
+      <div class="spinner"></div>
+      <ul class="loading-lines" id="loadingLines"></ul>
+    </div>
+  </section>
+
+  <!-- ============ FINAL SCREEN ============ -->
+  <section class="screen" id="screen-final">
+    <div class="card">
+      <!-- ✏️ EDIT FINAL RESULT TEXT HERE -->
+      <h1 class="result-title" id="finalTitle">Conclusion: 99.9% Academic Nerd 🤓📚</h1>
+      <p class="result-msg">After careful investigation, suspicious answers, organized notes, exam anxiety, and extremely scientific nonsense, we have concluded that you are definitely an academic nerd.</p>
+      <p class="result-small">Don't deny it. The evidence is highlighted in three colors. 🖍️🖍️🖍️</p>
+
+      <button class="btn" onclick="finalAction('accept')">Accept Academic Nerd Status 🤓</button>
+      <button class="btn secondary-btn" onclick="finalAction('deny')">Deny Everything</button>
+      <button class="btn secondary-btn" onclick="finalAction('grace')">I Need Grace Marks</button>
+      <button class="btn secondary-btn" onclick="finalAction('restart')">Restart Investigation</button>
+
+      <div class="final-feedback" id="finalFeedback"></div>
+    </div>
+  </section>
+
+</div>
+
+<footer>No real nerds were harmed during this investigation. 🤓💕</footer>
+
+<script>
+/* =========================================================
+   ✏️ EDIT QUESTIONS / OPTIONS / NERD VALUES HERE
+   Each option has: text, % to add to meter, and a funny
+   detective-style feedback line shown after picking it.
+========================================================= */
+const layers = [
+  {
+    question: "When the teacher says 'This won't come in the exam,' you…",
+    options: [
+      { text: "Believe it", value: 3, feedback: "Noted. Low suspicion, for now. 🕵️" },
+      { text: "Still mark it", value: 7, feedback: "Suspicious. Very suspicious. 🖍️" },
+      { text: "Ask someone to confirm", value: 9, feedback: "A true investigator move. We see you." },
+      { text: "Study it anyway, just in case", value: 13, feedback: "Topper energy detected. 🚨" }
+    ]
+  },
+  {
+    question: "Your relationship with notes is…",
+    options: [
+      { text: "Normal", value: 3, feedback: "Suspicion increased... slightly." },
+      { text: "I take notes sometimes", value: 7, feedback: "This answer has been recorded." },
+      { text: "My notes are organized", value: 10, feedback: "Very academic behavior. 📓" },
+      { text: "My notes have headings, colors, and emotional support value", value: 15, feedback: "Case file growing rapidly. 🖍️📊" }
+    ]
+  },
+  {
+    question: "Before an exam, you say…",
+    options: [
+      { text: "I know nothing", value: 4, feedback: "Classic opening statement. Logged." },
+      { text: "I barely studied", value: 8, feedback: "Suspicion increased. Sure you did." },
+      { text: "I'm finished", value: 11, feedback: "Confidence noted, council alerted." },
+      { text: "Then somehow write extra sheets in the exam", value: 16, feedback: "Academic weapon loading… 💣📝" }
+    ]
+  },
+  {
+    question: "If someone asks you for help before the exam, you…",
+    options: [
+      { text: "Say I also don't know", value: 4, feedback: "Allegedly. We'll see." },
+      { text: "Explain a little", value: 8, feedback: "Helpful... too helpful. 👀" },
+      { text: "Teach the whole chapter", value: 12, feedback: "This answer has been recorded." },
+      { text: "Accidentally become the professor", value: 17, feedback: "CGPA radar scanning… target found." }
+    ]
+  },
+  {
+    question: "What scares you most?",
+    options: [
+      { text: "Bad Wi-Fi", value: 3, feedback: "Relatable. Suspicion barely moved." },
+      { text: "Losing your notes", value: 9, feedback: "Emotional damage detected. 📒💔" },
+      { text: "A surprise quiz", value: 11, feedback: "Very academic behavior." },
+      { text: "Group study where nobody studies", value: 14, feedback: "Painfully specific. Evidence logged." }
+    ]
+  },
+  {
+    question: "When you get a lower mark than expected, you…",
+    options: [
+      { text: "Move on", value: 3, feedback: "Suspiciously chill. Noted." },
+      { text: "Feel sad", value: 7, feedback: "A normal human response. For now." },
+      { text: "Recheck the question paper", value: 11, feedback: "Suspicion increased significantly." },
+      { text: "Calculate exactly where the marks went", value: 16, feedback: "Calculator activity detected. 🧮" }
+    ]
+  },
+  {
+    question: "If someone calls you a nerd, you say…",
+    options: [
+      { text: "No", value: 4, feedback: "Denial #1 logged." },
+      { text: "Absolutely not", value: 8, feedback: "Stronger denial. Suspicious denial." },
+      { text: "I just study sometimes", value: 12, feedback: "'Sometimes' is doing a lot of work here." },
+      { text: "Define nerd academically first", value: 18, feedback: "The Academic Nerd Council has entered the chat. 🤓" }
+    ]
+  },
+  {
+    question: "Final evidence check: what is your most suspicious habit?",
+    options: [
+      { text: "Making to-do lists", value: 5, feedback: "Organized. Concerning." },
+      { text: "Highlighting important lines", value: 10, feedback: "Three colors minimum, clearly." },
+      { text: "Saying 'I didn't study' before doing well", value: 14, feedback: "The classic cover-up. Iconic, really." },
+      { text: "Explaining topics better than the teacher", value: 19, feedback: "Final piece of evidence secured. Case closed. 📁✅" }
+    ]
+  }
+];
+
+const loadingMessages = [
+  "Analyzing answers…",
+  "Checking note-taking intensity…",
+  "Measuring topper energy…",
+  "Scanning CGPA ambition…",
+  "Consulting the Academic Nerd Council…",
+  "Finalizing evidence…",
+  "Result found! 🎉"
+];
+
+const floatEmojis = ["📚","🤓","✏️","📝","🖍️","📐","☕","⭐","❓","📊","🧮","👓"];
+
+let currentLayer = 0;
+let nerdPercent = 0;
+
+/* ---------- floating background ---------- */
+function spawnFloaters(){
+  const container = document.getElementById('floaters');
+  const count = window.innerWidth < 500 ? 14 : 22;
+  for(let i=0;i<count;i++){
+    const el = document.createElement('div');
+    el.className = 'float-emoji';
+    el.textContent = floatEmojis[Math.floor(Math.random()*floatEmojis.length)];
+    el.style.left = Math.random()*100 + 'vw';
+    el.style.fontSize = (1.2 + Math.random()*1.6) + 'rem';
+    const duration = 14 + Math.random()*18;
+    el.style.animationDuration = duration + 's';
+    el.style.animationDelay = (-Math.random()*duration) + 's';
+    container.appendChild(el);
+  }
+}
+spawnFloaters();
+
+/* ---------- screen switching ---------- */
+function showScreen(id){
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+
+function beginInvestigation(){
+  currentLayer = 0;
+  nerdPercent = 0;
+  updateMeter(0, "");
+  document.getElementById('meterWrap').style.display = 'block';
+  renderLayer();
+  showScreen('screen-question');
+}
+
+function updateMeter(addAmount, flashText){
+  nerdPercent = Math.min(100, nerdPercent + addAmount);
+  document.getElementById('meterFill').style.width = nerdPercent + '%';
+  document.getElementById('meterPercent').textContent = Math.round(nerdPercent) + '%';
+  const flash = document.getElementById('meterFlash');
+  flash.textContent = flashText || "";
+  if(flashText){
+    flash.style.opacity = 1;
+    setTimeout(()=>{ flash.style.transition = 'opacity .8s'; flash.style.opacity = 0.0; }, 1400);
+    setTimeout(()=>{ flash.style.transition=''; }, 2300);
+  }
+}
+
+const meterFlashLines = [
+  "Suspicion increased.",
+  "Topper energy detected.",
+  "This answer has been recorded.",
+  "Very academic behavior."
+];
+
+function renderLayer(){
+  const layer = layers[currentLayer];
+  document.getElementById('progressTag').textContent = `Evidence ${currentLayer+1}/${layers.length}`;
+  document.getElementById('questionText').textContent = layer.question;
+  document.getElementById('feedbackBox').classList.remove('show');
+  document.getElementById('feedbackBox').textContent = "";
+
+  const container = document.getElementById('optionsContainer');
+  container.innerHTML = "";
+  layer.options.forEach(opt => {
+    const btn = document.createElement('button');
+    btn.className = 'option-btn';
+    btn.textContent = opt.text;
+    btn.onclick = () => selectOption(opt);
+    container.appendChild(btn);
+  });
+}
+
+function selectOption(opt){
+  const flash = meterFlashLines[Math.floor(Math.random()*meterFlashLines.length)];
+  updateMeter(opt.value, flash);
+
+  const feedbackBox = document.getElementById('feedbackBox');
+  feedbackBox.textContent = "🕵️ " + opt.feedback;
+  feedbackBox.classList.add('show');
+
+  // disable options briefly so it feels intentional
+  document.querySelectorAll('.option-btn').forEach(b => b.style.pointerEvents = 'none');
+
+  setTimeout(() => {
+    currentLayer++;
+    if(currentLayer < layers.length){
+      renderLayer();
+      document.querySelectorAll('.option-btn').forEach(b => b.style.pointerEvents = 'auto');
+    } else {
+      runLoadingSequence();
+    }
+  }, 1300);
+}
+
+/* ---------- loading sequence ---------- */
+function runLoadingSequence(){
+  showScreen('screen-loading');
+  const list = document.getElementById('loadingLines');
+  list.innerHTML = "";
+  loadingMessages.forEach((msg, i) => {
+    const li = document.createElement('li');
+    li.textContent = msg;
+    list.appendChild(li);
+    setTimeout(() => { li.classList.add('show'); }, i * 650);
+  });
+
+  setTimeout(() => {
+    showFinal();
+  }, loadingMessages.length * 650 + 700);
+}
+
+/* ---------- final screen ---------- */
+function showFinal(){
+  // Make sure meter visually reflects something close to a dramatic high number
+  document.getElementById('finalFeedback').classList.remove('show');
+  showScreen('screen-final');
+}
+
+function finalAction(type){
+  const fb = document.getElementById('finalFeedback');
+  fb.classList.add('show');
+
+  if(type === 'accept'){
+    fb.textContent = "Welcome to the Academic Nerd Club. Your highlighter is ready ✨";
+  } else if(type === 'deny'){
+    updateMeter(6, "Denial detected.");
+    fb.textContent = "Denial detected. Very topper behavior. Denying is also evidence.";
+  } else if(type === 'grace'){
+    updateMeter(10, "Request rejected.");
+    fb.textContent = "Request rejected. Nerd percentage increased by 10%.";
+  } else if(type === 'restart'){
+    document.getElementById('meterWrap').style.display = 'none';
+    nerdPercent = 0;
+    currentLayer = 0;
+    updateMeter(0, "");
+    showScreen('screen-start');
+  }
+}
+</script>
+
+</body>
+</html>
